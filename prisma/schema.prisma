@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum USER_ROLE {
+  USER
+  ADMIN
+  INSTRUCTOR
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String
+  password  String
+  firstname String?
+  lastname  String?
+  role      USER_ROLE @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+ 
+  //Relations
+  
+  Enrollment Enrollment[]
+  InstructorEnrollment  Enrollment[]  @relation(name: "instructorEnrollment")
+
+}
+
+model Course {
+  id           Int          @unique @default(autoincrement())
+  title        String
+  description  String?
+  price        Float
+  duration     Int
+  enrollments  Enrollment[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Enrollment {
+  id           Int              @id @default(autoincrement())
+  user         User             @relation(fields: [userID], references: [id])
+  // instructor   User?            @relation(name: "instructorEnrollment", fields: [instructorID], references: [id])
+  instructorID Int
+  userID       Int              @unique @default(autoincrement())
+  course       Course           @relation(fields: [courseID], references: [id])
+  courseID     Int              @unique @default(autoincrement())
+  status       EnrollmentStatus @default(ACTIVE)
+  createdAt    DateTime         @default(now())
+  updateAt     DateTime         @updatedAt
+
+  User User[]  @relation("instructorEnrollment")
+}
+
+enum Role {
+  USER
+  ADMIN 
+  INSTRUCTOR
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
