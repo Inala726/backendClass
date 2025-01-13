@@ -21,30 +21,29 @@ enum USER_ROLE {
 
 model User {
   id        Int       @id @default(autoincrement())
-  email     String
+  email     String    @unique
   password  String
   firstname String?
   lastname  String?
   role      USER_ROLE @default(USER)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
- 
-  //Relations
-  
-  Enrollment Enrollment[]
-  InstructorEnrollment  Enrollment[]  @relation(name: "instructorEnrollment")
 
+  //Relations
+
+  Enrollment           Enrollment[]
+  InstructorEnrollment Enrollment[] @relation(name: "instructorEnrollment")
 }
 
 model Course {
-  id           Int          @unique @default(autoincrement())
-  title        String
-  description  String?
-  price        Float
-  duration     Int
-  enrollments  Enrollment[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id          Int          @unique @default(autoincrement())
+  title       String
+  description String?
+  price       Float
+  duration    Int
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Enrollment {
@@ -59,12 +58,12 @@ model Enrollment {
   createdAt    DateTime         @default(now())
   updateAt     DateTime         @updatedAt
 
-  User User[]  @relation("instructorEnrollment")
+  User User[] @relation("instructorEnrollment")
 }
 
 enum Role {
   USER
-  ADMIN 
+  ADMIN
   INSTRUCTOR
 }
 
