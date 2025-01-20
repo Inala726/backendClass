@@ -1,6 +1,9 @@
 import { Response, Request, NextFunction } from "express";
 import { UserServiceImpl } from "../service/impl/user.service.impl";
 import { CreateUserDTO } from "../dtos/createUser.dto";
+import { CustomRequest } from "../middleware/auth.middleware";
+import { StatusCodes } from "http-status-codes";
+import { error } from "console";
 
 export class UserController {
   private userService: UserServiceImpl;
@@ -73,6 +76,24 @@ export class UserController {
       const userId = parseInt(req.params.id);
       const user = await this.userService.deleteUser(userId);
       res.status(200).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+  public profile = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void | any> => {
+    try {
+      const id = req.userAuth;
+      const user = await this.userService.getUserById(Number(id));
+
+      res.status(StatusCodes.OK).json({
+        error: false,
+        message: "User profile retrieved successfully",
+        data: user,
+      });
     } catch (error) {
       next(error);
     }

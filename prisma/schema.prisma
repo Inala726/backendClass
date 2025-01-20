@@ -20,14 +20,19 @@ enum USER_ROLE {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  password  String
-  firstname String?
-  lastname  String?
-  role      USER_ROLE @default(USER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  firstname   String?
+  lastname    String?
+  verifyEmail Boolean   @default(false)
+  otp         String?
+  otpExpires  String?
+  role        USER_ROLE @default(USER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  provider    String?   @default("local")
+  googleID    String?
 
   //Relations
 

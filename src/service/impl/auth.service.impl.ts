@@ -1,48 +1,39 @@
-import { LoginDTO } from "../../dtos/login.dto";
-import { AuthServices } from "../auth.services";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import { CustomError } from "../../utils/customError.utils";
 import { db } from "../../config/db";
+import { LoginDTO } from "../../dtos/login.dto";
+import { CustomError } from "../../utils/customError.utils";
 import { comparePassword } from "../../utils/password.utils";
+import jwt from "jsonwebtoken";
+import { AuthService } from "../auth.services";
 
-dotenv.config();
+export class AuthServiceImp implements AuthService {
+  async login(data: LoginDTO): Promise<{ accessToken: string; refreshToken: string }> {
+    const user = await db.user.findUnique({ where: { email: data.email } });
 
-export class AuthServicesImpl implements AuthServices {
-  async login(
-    data: LoginDTO
-  ): Promise<{accessToken: string, refreshToken: string}> {
-    const user = await db.user.findFirst({
-      where: {
-        email: data.email,
-      },
-    });
     if (!user) {
-      throw new CustomError(404, "User not found");
+      throw new CustomError(401, "Invalid email or password");
     }
 
-    const isPasswordValid = await comparePassword(data.password, user.password);
-    if(!isPasswordValid){
-      throw new CustomError(401, "Invalid password or email");
+    const isPasswordValid = await comparePassword(data.password, user.password || "");
+    if (!isPasswordValid) {
+      throw new CustomError(401, "Invalid email or password");
     }
 
-    const fullName = user.firstname + " " + user.lastname;
-    const accessToken = this.generateAccessToken(user.id, fullName, user.role);
+    const fullname = `${user.firstname} ${user.lastname}`;
+    const accessToken = this.generateAcessToken(user.id, fullname, user.role);
+    const refreshToken = this.generateRefreshToken(user.id, fullname, user.role);
 
-    const refreshToken = this.generateRefreshToken(user.id, fullName, user.role)
-
-    return {accessToken, refreshToken}
+    return { accessToken, refreshToken };
   }
 
-  generateAccessToken(userId: number, name: string, role: string): string {
-    return jwt.sign([userId, name, role], process.env.JWT_SECRET || "", {
+  generateAcessToken(userId: number, name: string, role: string): string {
+    return jwt.sign({ id: userId, name, role }, process.env.JWT_SECRET || "", {
       expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
     });
   }
 
   generateRefreshToken(userId: number, name: string, role: string): string {
-    return jwt.sign([userId, name, role], process.env.JWT_SECRET || "", {
-      expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+    return jwt.sign({ id: userId, name, role }, process.env.JWT_SECRET || "", {
+      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
     });
   }
 }

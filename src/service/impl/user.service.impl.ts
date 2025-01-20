@@ -4,8 +4,22 @@ import { UserServices } from "../user.services";
 import { CustomError } from "../../utils/customError.utils";
 import { db } from "../../config/db";
 import { hashPassword } from "../../utils/password.utils";
+import { StatusCodes } from "http-status-codes";
 
 export class UserServiceImpl implements UserServices {
+  async profile(id: number): Promise<Omit<User, "password">> {
+    const user = await db.user.findFirst({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new CustomError(
+        StatusCodes.NOT_FOUND,
+        `user with id ${id} not found`
+      );
+    }
+    return user;
+  }
   async createUser(data: CreateUserDTO): Promise<User> {
     const isUserExist = await db.user.findFirst({
       where: {
