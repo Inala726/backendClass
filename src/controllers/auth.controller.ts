@@ -10,7 +10,6 @@ export class AuthController {
     this.authService = new AuthServiceImp();
   }
 
-  // Standard login with email and password
   public login = async (
     req: Request,
     res: Response,
@@ -25,30 +24,26 @@ export class AuthController {
     }
   };
 
-  // Initiate Google OAuth
-  public googleLogin = passport.authenticate("google", {
-    scope: ["profile", "email"],
-  });
+//   public googleLogin = passport.authenticate("google", {
+//     scope: ["profile", "email"],
+//   });
 
-  // Handle Google OAuth callback
-  public googleCallback = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
-    passport.authenticate("google", { session: false }, (err, user) => {
-      if (err || !user) {
-        return res.status(401).json({ message: "Google authentication failed" });
-      }
+//   public googleCallback = async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+//   ): Promise<void> => {
+//     passport.authenticate("google", { session: false }, (err, user) => {
+//       if (err || !user) {
+//         return res.status(401).json({ message: "Google authentication failed" });
+//       }
 
-      // Generate JWT tokens
-      const { id, firstname, lastname, role } = user;
-      const fullname = `${firstname} ${lastname}`;
-      const accessToken = this.authService.generateAcessToken(id, fullname, role);
-      const refreshToken = this.authService.generateRefreshToken(id, fullname, role);
+//       const { id, firstname, lastname, role } = user;
+//       const fullname = `${firstname} ${lastname}`;
+//       const accessToken = this.authService.generateAcessToken(id, fullname, role);
+//       const refreshToken = this.authService.generateRefreshToken(id, fullname, role);
 
-      // Respond with tokens
-      res.status(200).json({ accessToken, refreshToken });
-    })(req, res, next);
-  };
+//       res.status(200).json({ accessToken, refreshToken });
+//     })(req, res, next);
+//   };
 }

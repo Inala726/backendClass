@@ -24,35 +24,35 @@ export const authenticateUser = async (
 
     const token = authHeader.split(" ")[1];
 
-    if (authHeader.startsWith("Bearer google")) {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
+    // if (authHeader.startsWith("Bearer google")) {
+    //   const ticket = await googleClient.verifyIdToken({
+    //     idToken: token,
+    //     audience: process.env.GOOGLE_CLIENT_ID,
+    //   });
 
-      const payload = ticket.getPayload();
-      if (!payload || !payload.email) {
-        res.status(401).json({ message: "Invalid Google token" });
-        return;
-      }
+    //   const payload = ticket.getPayload();
+    //   if (!payload || !payload.email) {
+    //     res.status(401).json({ message: "Invalid Google token" });
+    //     return;
+    //   }
 
-      let user = await db.user.findUnique({ where: { email: payload.email } });
+    //   let user = await db.user.findUnique({ where: { email: payload.email } });
 
-      if (!user) {
-        user = await db.user.create({
-          data: {
-            email: payload.email,
-            firstname: payload.given_name || "",
-            lastname: payload.family_name || "",
-            isGoogleAuth: true,
-          },
-        });
-      }
+    //   if (!user) {
+    //     user = await db.user.create({
+    //       data: {
+    //         email: payload.email,
+    //         firstname: payload.given_name || "",
+    //         lastname: payload.family_name || "",
+    //         isGoogleAuth: true,
+    //       },
+    //     });
+    //   }
 
-      req.userAuth = user.id.toString();
-      next();
-      return;
-    }
+    //   req.userAuth = user.id.toString();
+    //   next();
+    //   return;
+    // }
 
     jwt.verify(token, process.env.JWT_SECRET || "", (err, decode) => {
       if (err) {

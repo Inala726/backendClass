@@ -33,6 +33,7 @@ model User {
   updatedAt   DateTime  @updatedAt
   provider    String?   @default("local")
   googleID    String?
+  isGoogleAuth Boolean?
 
   //Relations
 
