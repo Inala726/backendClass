@@ -4,6 +4,7 @@ import { CreateUserDTO } from "../dtos/createUser.dto";
 import { CustomRequest } from "../middleware/auth.middleware";
 import { StatusCodes } from "http-status-codes";
 import { error } from "console";
+import { ChangePasswordDTO } from "../dtos/verifyEmail.dto";
 
 export class UserController {
   private userService: UserServiceImpl;
@@ -98,4 +99,22 @@ export class UserController {
       next(error);
     }
   };
+
+  public setPassword = async(
+    req:CustomRequest,
+    res:Response,
+    next:NextFunction
+): Promise<void> =>{
+    try{
+        const id = req.userAuth;
+        const data = req.body as ChangePasswordDTO;
+        const user = await this.userService.setPassword(Number(id), data);
+        res.status(StatusCodes.OK).json({
+            error: false,
+            message: "Password changed successfully",
+        })
+    }catch(error){
+        next(error)
+    }
+}
 }
