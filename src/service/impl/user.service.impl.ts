@@ -8,7 +8,6 @@ import { StatusCodes } from "http-status-codes";
 import { ChangePasswordDTO } from "../../dtos/verifyEmail.dto";
 
 export class UserServiceImpl implements UserServices {
-
   async setPassword(id: number, data: ChangePasswordDTO): Promise<void> {
     await db.$transaction(async (transaction) => {
       const user = await transaction.user.findUnique({
@@ -72,31 +71,29 @@ export class UserServiceImpl implements UserServices {
 
       const passwordHistoryCount = await transaction.passwordHistory.count({
         where: {
-          userId: id
-        }
-      })
+          userId: id,
+        },
+      });
 
-      if(passwordHistoryCount > 5){
+      if (passwordHistoryCount > 5) {
         const oldestPassword = await transaction.passwordHistory.findFirst({
-           where: {
-            userId: id
-           },
-           orderBy: {
-            createdAt: 'asc'
-           },
-        })
-        if(oldestPassword){
-           await transaction.passwordHistory.delete({
+          where: {
+            userId: id,
+          },
+          orderBy: {
+            createdAt: "asc",
+          },
+        });
+        if (oldestPassword) {
+          await transaction.passwordHistory.delete({
             where: {
-              id: oldestPassword.id
+              id: oldestPassword.id,
             },
-           })
+          });
         }
       }
-      
     });
   }
-
 
   async profile(id: number): Promise<Omit<User, "password">> {
     const user = await db.user.findFirst({
@@ -167,5 +164,32 @@ export class UserServiceImpl implements UserServices {
     await db.user.delete({
       where: { id },
     });
+  }
+
+  async updateProfilePic(
+    id: number,
+    data: { profilePic: string }
+  ): Promise<Object | any> {
+    const user = await db.user.findFirst({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new CustomError(StatusCodes.NOT_FOUND, "User not found");
+    }
+    const updatedUser = await db.user.update({
+      where: {
+        id,
+      },
+      data: { profilePicture: data.profilePic },
+    });
+
+    //return updateuser without sensitive fileds like password
+    return {
+      id: updatedUser.id,
+      name: updatedUser.firstname,
+      email: updatedUser.email,
+      profilePicture: updatedUser.profilePicture,
+    };
   }
 }

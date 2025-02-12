@@ -100,21 +100,51 @@ export class UserController {
     }
   };
 
-  public setPassword = async(
-    req:CustomRequest,
-    res:Response,
-    next:NextFunction
-): Promise<void> =>{
-    try{
-        const id = req.userAuth;
-        const data = req.body as ChangePasswordDTO;
-        const user = await this.userService.setPassword(Number(id), data);
-        res.status(StatusCodes.OK).json({
-            error: false,
-            message: "Password changed successfully",
-        })
-    }catch(error){
-        next(error)
+  public setPassword = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const id = req.userAuth;
+      const data = req.body as ChangePasswordDTO;
+      const user = await this.userService.setPassword(Number(id), data);
+      res.status(StatusCodes.OK).json({
+        error: false,
+        message: "Password changed successfully",
+      });
+    } catch (error) {
+      next(error);
     }
-}
+  };
+
+  public updateProfilePic = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const userId = req.userAuth;
+      if (!req.file || !req.file.path) {
+        res.status(400).json({
+          error: true,
+          message: "No profile image uploaded",
+        });
+        return;
+      }
+
+      const profilePicUrl = req.file.path; // Cloudinary URL after upload
+      await this.userService.updateProfilePic(Number(userId), {
+        profilePic: profilePicUrl,
+      });
+
+      res.status(200).json({
+        error: false,
+        message: "Profile picture updated successfully",
+        data: { profilePic: profilePicUrl },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
